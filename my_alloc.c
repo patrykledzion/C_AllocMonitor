@@ -8,44 +8,20 @@ void _alloc_monitor_delMem(void* ptr);
 
 void _alloc_monitor_addMem(size_t size, const char* file, const char* function, int line, void* ptr)
 {
-	if (g_AllocMonitor == NULL)
+	struct _alloc_monitor_t* curr = (struct _alloc_monitor_t*)malloc(sizeof(struct _alloc_monitor_t));
+	if (curr == NULL)
 	{
-		g_AllocMonitor = (struct _alloc_monitor_t*)malloc(sizeof(struct _alloc_monitor_t));
-		if (g_AllocMonitor == NULL)
-		{
-			printf("\nMEM ALLOCATION ERROR\n");
-			exit(1);
-		}
-		 
-		g_AllocMonitor->size = size;
-		g_AllocMonitor->file = file;
-		g_AllocMonitor->function = function;
-		g_AllocMonitor->line = line;
-		g_AllocMonitor->ptr = ptr;
-		g_AllocMonitor->next = NULL;
+		printf("\nMEM ALLOCATION ERROR\n");
+		exit(1);
 	}
-	else {
-		struct _alloc_monitor_t* curr = g_AllocMonitor;
 
-		while (curr->next != NULL)
-		{
-			curr = curr->next;
-		}
-
-		curr->next = malloc(sizeof(struct _alloc_monitor_t));
-		if (curr->next == NULL)
-		{
-			printf("\nMEM ALLOCATION ERROR\n");
-			exit(1);
-		}
-		 
-		curr->next->size = size;
-		curr->next->file = file;
-		curr->next->function = function;
-		curr->next->line = line;
-		curr->next->ptr = ptr;
-		curr->next->next = NULL;
-	}
+	curr->size = size;
+	curr->file = file;
+	curr->function = function;
+	curr->line = line;
+	curr->ptr = ptr;
+	curr->next = g_AllocMonitor;
+	g_AllocMonitor = curr;
 }
 
 void _alloc_monitor_delMem(void* ptr)
