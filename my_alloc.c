@@ -5,6 +5,10 @@ static struct _alloc_monitor_t* g_AllocMonitor = NULL;
 void _alloc_monitor_addMem(size_t size, const char* file, const char* function, int line, void* ptr);
 void _alloc_monitor_delMem(void* ptr);
 
+#undef malloc
+#undef free
+
+static g_allocMonitorOn = 0;
 
 void _alloc_monitor_addMem(size_t size, const char* file, const char* function, int line, void* ptr)
 {
@@ -49,21 +53,32 @@ void _alloc_monitor_showMem()
 	}
 }
 
+void set_alloc_monitor(int on)
+{
+	g_allocMonitorOn = on;
+}
+
 void* _alloc_monitor_my_alloc_debug(size_t size, const char* file, const char* function, int line)
 {
 	void* mem = malloc(size);
-	if (mem == NULL)
+	if (g_allocMonitorOn)
 	{
-		printf("MEMORY ALLOCATION ERROR");
-		exit(1);
+		if (mem == NULL)
+		{
+			printf("MEMORY ALLOCATION ERROR");
+			exit(1);
+		}
+		_alloc_monitor_addMem(size, file, function, line, mem);
 	}
-	_alloc_monitor_addMem(size, file, function, line, mem);
 	return mem;
 }
 
 void _alloc_monitor_my_free_debug(void* ptr)
 {
-	if (ptr == NULL)return;
+	if (g_allocMonitorOn)
+	{
+		if (ptr == NULL)return;
+	}
 	_alloc_monitor_delMem(ptr);
 	free(ptr);
 }
